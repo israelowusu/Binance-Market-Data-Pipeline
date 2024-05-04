@@ -1,0 +1,31 @@
+# Python-related files
+*.pyc
+__pycache__/
+*.pyo
+*.pyc
+
+# Virtual environments
+venv/
+env/
+*.venv/
+
+# Compiled Python bytecode
+*.pyc
+*.pyo
+__pycache__/
+
+# Terraform
+.terraform/
+
+# Compiled dbt artifacts
+target/
+
+# IDE and text editor files
+.idea/
+.vscode/
+*.swp
+*~
+
+# System files and directories
+.DS_Store
+Thumbs.db
