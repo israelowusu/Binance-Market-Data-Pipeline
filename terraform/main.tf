@@ -1,30 +1,30 @@
 provider "aws" {
-  region = "us-east-1"
+  region = "your-region-here"
 }
 
 # Create a Redshift cluster
-resource "aws_redshift_cluster" "coinbase_cluster" {
-  cluster_identifier = "coinbase-cluster"
-  database_name      = "coinbasedb"
-  master_username    = "coinbase"
-  master_password    = "Greatness663"
+resource "aws_redshift_cluster" "your-cluster" {
+  cluster_identifier = "your-cluster-identifier"
+  database_name      = "your-db-name"
+  master_username    = "username"
+  master_password    = "password"
   node_type          = "dc2.large"
   cluster_type       = "single-node"
 
   publicly_accessible = true
 
-  vpc_security_group_ids = [aws_security_group.coinbase_sg.id]
-  iam_roles              = [aws_iam_role.coinbase_role.arn]
+  vpc_security_group_ids = ["your-sg"]
+  iam_roles              = ["your-roles"]
 }
 
 # Create an IAM user
-resource "aws_iam_user" "coinbase_user" {
-  name = "coinbase_user"
+resource "aws_iam_user" "iam-user" {
+  name = "iam-name"
 }
 
 # Create an IAM policy for the user
-resource "aws_iam_policy" "coinbase_policy" {
-  name        = "coinbase_policy"
+resource "aws_iam_policy" "your-policy" {
+  name        = "name-of-policy"
   description = "Policy granting access to the S3 bucket, Redshift cluster, and RDS PostgreSQL instance"
 
   policy = jsonencode({
@@ -44,14 +44,14 @@ resource "aws_iam_policy" "coinbase_policy" {
 }
 
 # Attach the policy to the IAM user
-resource "aws_iam_user_policy_attachment" "coinbase_attachment" {
-  user       = aws_iam_user.coinbase_user.name
-  policy_arn = aws_iam_policy.coinbase_policy.arn
+resource "aws_iam_user_policy_attachment" "your-policy-attachment" {
+  user       = aws_iam_user.iam-user.name
+  policy_arn = aws_iam_policy.your-policy.arn
 }
 
 # Create a security group for the Redshift cluster and RDS PostgreSQL instance
-resource "aws_security_group" "coinbase_sg" {
-  name        = "coinbase_sg"
+resource "aws_security_group" "your-sg" {
+  name        = "your-sg-name"
   description = "Security group for Redshift cluster and RDS PostgreSQL instance"
 
   ingress {
@@ -70,8 +70,8 @@ resource "aws_security_group" "coinbase_sg" {
 }
 
 # Create an IAM role for the Redshift cluster
-resource "aws_iam_role" "coinbase_role" {
-  name = "coinbase_role"
+resource "aws_iam_role" "your-role" {
+  name = "role-name"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
