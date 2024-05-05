@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-east-1"
+  region = "your-region-here"
 }
 
 # Create a Redshift cluster
@@ -13,8 +13,8 @@ resource "aws_redshift_cluster" "your-cluster" {
 
   publicly_accessible = true
 
-  vpc_security_group_ids = [your-sg]
-  iam_roles              = [your-roles]
+  vpc_security_group_ids = ["your-sg"]
+  iam_roles              = ["your-roles"]
 }
 
 # Create an IAM user
