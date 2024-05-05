@@ -1,0 +1,4 @@
+coinbase==2.0.0
+boto3==1.18.66
+snowflake-connector-python==2.6.3
+psycopg2-binary==2.9.1
