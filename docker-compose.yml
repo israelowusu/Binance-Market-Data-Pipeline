@@ -1,21 +1,24 @@
 version: '3'
 services:
-  app:
+  airflow:
     build: .
+    restart: always
+    environment:
+      - LOAD_EX=n
+      - EXECUTOR=Local
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://<username>:<password>@<host>:5432/<database>
+    volumes:
+      - ./dags:/usr/local/airflow/dags
+      - ./logs:/usr/local/airflow/logs
+      - ./plugins:/usr/local/airflow/plugins
     ports:
       - "8080:8080"
+
+  aws:
+    image: amazon/aws-cli
     environment:
-      COINBASE_API_KEY: "your_coinbase_api_key_here"
-      AWS_ACCESS_KEY_ID: "your_aws_access_key_id_here"
-      AWS_SECRET_ACCESS_KEY: "your_aws_secret_access_key_here"
-      AWS_DEFAULT_REGION: "your_aws_region_here"
-      SNOWFLAKE_ACCOUNT: "your_snowflake_account_here"
-      SNOWFLAKE_USER: "your_snowflake_user_here"
-      SNOWFLAKE_PASSWORD: "your_snowflake_password_here"
-      SNOWFLAKE_DATABASE: "your_snowflake_database_here"
-      SNOWFLAKE_SCHEMA: "your_snowflake_schema_here"
-      SNOWFLAKE_WAREHOUSE: "your_snowflake_warehouse_here"
-      POSTGRES_HOST: "your_postgresql_host_here"
-      POSTGRES_DB: "your_postgresql_db_here"
-      POSTGRES_USER: "your_postgresql_user_here"
-      POSTGRES_PASSWORD: "your_postgresql_password_here"
+      - AWS_ACCESS_KEY_ID=<your_access_key_id>
+      - AWS_SECRET_ACCESS_KEY=<your_secret_access_key>
+      - AWS_DEFAULT_REGION=<your_default_region>
+    volumes:
+      - ./aws:/root/.aws
