@@ -3,22 +3,16 @@ import json
 import zipfile
 import requests
 from datetime import datetime, timedelta
-from boto3 import client
+from google.cloud import storage
 
 # Coinbase API settings
-COINBASE_API_KEY = 'YOUR_API_KEY'
-COINBASE_API_SECRET = 'YOUR_API_SECRET'
 COINBASE_API_URL = 'https://api.coinbase.com/v2'
 
-# Amazon S3 settings
-S3_BUCKET_NAME = 'YOUR_S3_BUCKET_NAME'
+# Google Cloud Storage settings
+GCS_BUCKET_NAME = 'YOUR_GCS_BUCKET_NAME'
 
 # Set up Coinbase API credentials
 headers = {
-    'CB-ACCESS-KEY': COINBASE_API_KEY,
-    'CB-ACCESS-SIGN': COINBASE_API_SECRET,
-    'CB-ACCESS-TIMESTAMP': str(int(datetime.now().timestamp())),
-    'CB-ACCESS-PASSPHRASE': 'YOUR_API_PASSPHRASE',
     'Content-Type': 'application/json'
 }
 
@@ -63,6 +57,13 @@ def compress_data(data):
         with zip_file.open('news.json', 'w') as news_file:
             json.dump(data['news'], news_file)
 
+# Function to upload data to Google Cloud Storage
+def upload_to_gcs():
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(GCS_BUCKET_NAME)
+    blob = bucket.blob(f'data-{datetime.now().strftime("%Y-%m-%d")}.zip')
+    blob.upload_from_filename('data.zip')
+
 # Main function
 def main():
     data = {}
@@ -71,8 +72,7 @@ def main():
 
     compress_data(data)
 
-    s3 = client('s3')
-    s3.put_object(Body=open('data.zip', 'rb'), Bucket=S3_BUCKET_NAME, Key=f'data-{datetime.now().strftime("%Y-%m-%d")}.zip')
+    upload_to_gcs()
 
 if __name__ == '__main__':
     main()
