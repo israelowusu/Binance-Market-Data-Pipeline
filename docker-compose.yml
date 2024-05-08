@@ -3,22 +3,11 @@ services:
   airflow:
     build: .
     restart: always
-    environment:
-      - LOAD_EX=n
-      - EXECUTOR=Local
-      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://<username>:<password>@<host>:5432/<database>
     volumes:
-      - ./dags:/usr/local/airflow/dags
-      - ./logs:/usr/local/airflow/logs
-      - ./plugins:/usr/local/airflow/plugins
+      - ./airflow.cfg:/home/phendy/airflow/airflow.cfg
+      - ./dags:/home/phendy/airflow/dags
+      - ./logs:/home/phendy/airflow/logs
+      - ./plugins:/home/phendy/airflow/plugins
+      - /home/phendy/Downloads/intrepid-period-422622-n5-4b46f2a8737b.json:/home/phendy/Downloads/intrepid-period-422622-n5-4b46f2a8737b.json
     ports:
       - "8080:8080"
-
-  aws:
-    image: amazon/aws-cli
-    environment:
-      - AWS_ACCESS_KEY_ID=<your_access_key_id>
-      - AWS_SECRET_ACCESS_KEY=<your_secret_access_key>
-      - AWS_DEFAULT_REGION=<your_default_region>
-    volumes:
-      - ./aws:/root/.aws

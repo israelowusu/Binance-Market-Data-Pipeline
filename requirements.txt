@@ -1,3 +1,3 @@
 coinbase==2.0.0
-boto3==1.34.98
-psycopg2-binary==2.9.1
+apache-airflow-providers-google==10.17.0    
+psycopg2-binary==2.9.1  # For interacting with PostgreSQL
