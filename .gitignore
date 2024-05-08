@@ -14,9 +14,6 @@ env/
 *.pyo
 __pycache__/
 
-# Terraform
-.terraform/
-
 # Compiled dbt artifacts
 target/
 
