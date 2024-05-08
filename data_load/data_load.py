@@ -1,26 +1,21 @@
-import boto3
-import psycopg2
 import json
 from datetime import datetime
 import zipfile
 import io
+from google.cloud import storage, bigquery
 
-# Set up S3 and Redshift connections
-s3 = boto3.client('s3')
-redshift = psycopg2.connect(
-    host='your-redshift-endpoint',
-    port='5439',
-    dbname='your-redshift-dbname',
-    iam_role='arn:aws:iam::123456789012:role/your-redshift-iam-role'
-)
+# Set up Google Cloud Storage (GCS) and BigQuery connections
+storage_client = storage.Client()
+bigquery_client = bigquery.Client()
 
-# Set up S3 bucket and key
+# Set up GCS bucket and blob name
 bucket_name = 'coinbase-api-bucket'
-key = 'data-2023-03-21.zip'
+blob_name = 'data-2023-03-21.zip'
 
-# Download the ZIP file from S3
-obj = s3.get_object(Bucket=bucket_name, Key=key)
-data = obj['Body'].read()
+# Download the ZIP file from GCS
+bucket = storage_client.bucket(bucket_name)
+blob = bucket.blob(blob_name)
+data = blob.download_as_string()
 
 # Extract the ZIP file
 with zipfile.ZipFile(io.BytesIO(data), 'r') as zip_ref:
@@ -42,19 +37,18 @@ for price in prices_data:
         'currency': price['currency']
     })
 
-# Load the transformed data into Redshift
-with redshift.cursor() as cur:
-    cur.execute('''
-        CREATE TABLE IF NOT EXISTS coinbase_prices (
-            timestamp TIMESTAMP,
-            price NUMERIC(18, 8),
-            currency VARCHAR(10)
-        )
-    ''')
-    cur.executemany('''
-        INSERT INTO coinbase_prices (timestamp, price, currency)
-        VALUES (%s, %s, %s)
-    ''', [(row['timestamp'], row['price'], row['currency']) for row in transformed_data])
+# Load the transformed data into BigQuery
+dataset_id = 'your_dataset_id'
+table_id = 'coinbase_prices'
 
-# Commit the transaction
-redshift.commit()
+dataset_ref = bigquery_client.dataset(dataset_id)
+table_ref = dataset_ref.table(table_id)
+table = bigquery_client.get_table(table_ref)
+
+rows_to_insert = []
+for row in transformed_data:
+    rows_to_insert.append((row['timestamp'], row['price'], row['currency']))
+
+errors = bigquery_client.insert_rows(table, rows_to_insert)  # Make an API request.
+if errors:
+    print(f'Errors occurred while inserting rows: {errors}')
