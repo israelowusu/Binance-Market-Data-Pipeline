@@ -9,8 +9,8 @@ storage_client = storage.Client()
 bigquery_client = bigquery.Client()
 
 # Set up GCS bucket and blob name
-bucket_name = 'coinbase-api-bucket'
-blob_name = 'data-2023-03-21.zip'
+bucket_name = 'coinbase_api_bucket'
+blob_name = 'binance-data-project.zip'
 
 # Download the ZIP file from GCS
 bucket = storage_client.bucket(bucket_name)
@@ -38,8 +38,8 @@ for price in prices_data:
     })
 
 # Load the transformed data into BigQuery
-dataset_id = 'your_dataset_id'
-table_id = 'coinbase_prices'
+dataset_id = 'coinbase_data_warehouse'
+table_id = 'binance_prices'
 
 dataset_ref = bigquery_client.dataset(dataset_id)
 table_ref = dataset_ref.table(table_id)

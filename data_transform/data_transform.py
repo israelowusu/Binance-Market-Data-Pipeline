@@ -21,7 +21,7 @@ for var in required_env_vars:
 # Set up BigQuery query to fetch transformed data
 query = """
     SELECT timestamp, price, currency
-    FROM `your_project_id.your_dataset_id.coinbase_prices`
+    FROM `intrepid-period-422622-n5.coinbase_data_warehouse.binance_prices`
 """
 
 # Execute query in BigQuery
@@ -47,7 +47,7 @@ with cloudsql_conn.cursor() as cursor:
 
 # Insert rows into PostgreSQL table
 insert_sql = """
-    INSERT INTO coinbase_prices (timestamp, price, currency)
+    INSERT INTO binance_prices (timestamp, price, currency)
     VALUES (%s, %s, %s)
 """
 
