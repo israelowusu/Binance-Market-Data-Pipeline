@@ -1,3 +1,4 @@
 coinbase==2.0.0
 apache-airflow-providers-google==10.17.0    
-psycopg2-binary==2.9.1  # For interacting with PostgreSQL
+psycopg2-binary==2.9.1 
+grafana-client==4.1.0
