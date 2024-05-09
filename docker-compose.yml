@@ -5,9 +5,9 @@ services:
     restart: always
     volumes:
       - ./airflow.cfg:/home/phendy/airflow/airflow.cfg
-      - ./dags:/home/phendy/airflow/dags
-      - ./logs:/home/phendy/airflow/logs
-      - ./plugins:/home/phendy/airflow/plugins
+      - ./dags:/home/phendy/code/data-engineer-projects/Coinbase-Market-Data-Pipeline/dags
+      - ./logs:/home/phendy/code/data-engineer-projects/Coinbase-Market-Data-Pipeline/logs
+      - ./plugins:/home/phendy/code/data-engineer-projects/Coinbase-Market-Data-Pipeline/plugins
       - /home/phendy/Downloads/intrepid-period-422622-n5-4b46f2a8737b.json:/home/phendy/Downloads/intrepid-period-422622-n5-4b46f2a8737b.json
     ports:
       - "8080:8080"

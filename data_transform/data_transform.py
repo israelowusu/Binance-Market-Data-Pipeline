@@ -33,7 +33,7 @@ cloudsql_conn = psycopg2.connect(**cloudsql_conn_params)
 
 # Define PostgreSQL table schema
 create_table_sql = """
-    CREATE TABLE IF NOT EXISTS coinbase_prices (
+    CREATE TABLE IF NOT EXISTS binance_prices (
         timestamp TIMESTAMP,
         price NUMERIC(18, 8),
         currency VARCHAR(10)
