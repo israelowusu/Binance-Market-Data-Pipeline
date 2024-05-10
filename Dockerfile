@@ -4,6 +4,9 @@ FROM python:3.8-slim-buster
 # Set the working directory in the container to /app
 WORKDIR /app
 
+# Copy the entrypoint.sh file to the container
+COPY entrypoint.sh /home/phendy/code/data-engineer-projects/Binance-Market-Data-Pipeline/entrypoint.sh
+
 # Add the current directory contents into the container at /app
 ADD requirements.txt /app/requirements.txt
 
@@ -13,5 +16,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Make port 8080 available to the world outside this container
 EXPOSE 8080
 
-# Run app.py when the container launches
-CMD ["python", "dags/binance_etl.py"]
+# Set the entrypoint to the entrypoint.sh script
+ENTRYPOINT ["/bin/bash", "-c"]
+
+# Set the command to run the entrypoint.sh script
+CMD ["/home/phendy/code/data-engineer-projects/Binance-Market-Data-Pipeline/entrypoint.sh"]
