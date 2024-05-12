@@ -26,3 +26,6 @@ target/
 # System files and directories
 .DS_Store
 Thumbs.db
+
+# Configuration files
+client.properties
