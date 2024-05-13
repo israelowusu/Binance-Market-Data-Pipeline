@@ -1,29 +1,28 @@
 import os
 import psycopg2
 from google.cloud import bigquery
+import configparser
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/home/phendy/Downloads/intrepid-period-422622-n5-4b46f2a8737b.json"
+
+# Read database credentials from config.ini file
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 # Set up BigQuery and Cloud SQL PostgreSQL connections
 bigquery_client = bigquery.Client()
 cloudsql_conn_params = {
-    'dbname': os.environ.get('CLOUDSQL_DBNAME'),
-    'user': os.environ.get('CLOUDSQL_USERNAME'),
-    'password': os.environ.get('CLOUDSQL_PASSWORD'),
-    'host': os.environ.get('CLOUDSQL_HOST'),
-    'port': '5432'  # Change port if necessary
+    'dbname': config['development']['DB_NAME'],
+    'user': config['development']['DB_USER'],
+    'password': config['development']['DB_PASSWORD'],
+    'host': config['development']['DB_HOST'],
+    'port': config['development']['DB_PORT']
 }
-
-# Ensure all required environment variables are set
-required_env_vars = ['CLOUDSQL_DBNAME', 'CLOUDSQL_USERNAME', 'CLOUDSQL_PASSWORD', 'CLOUDSQL_HOST']
-for var in required_env_vars:
-    if var not in os.environ:
-        raise ValueError(f"Environment variable {var} is not set.")
 
 # Set up BigQuery query to fetch transformed data
 query = """
     SELECT timestamp, price, currency
-    FROM `intrepid-period-422622-n5.coinbase_data_warehouse.binance_prices`
+    FROM `intrepid-period-422622-n5.coinbase_data_warehouse.prices`
 """
 
 # Execute query in BigQuery
@@ -35,7 +34,7 @@ cloudsql_conn = psycopg2.connect(**cloudsql_conn_params)
 
 # Define PostgreSQL table schema
 create_table_sql = """
-    CREATE TABLE IF NOT EXISTS binance_prices (
+    CREATE TABLE IF NOT EXISTS prices (
         timestamp TIMESTAMP,
         price NUMERIC(18, 8),
         currency VARCHAR(10)
@@ -49,7 +48,7 @@ with cloudsql_conn.cursor() as cursor:
 
 # Insert rows into PostgreSQL table
 insert_sql = """
-    INSERT INTO binance_prices (timestamp, price, currency)
+    INSERT INTO prices (timestamp, price, currency)
     VALUES (%s, %s, %s)
 """
 

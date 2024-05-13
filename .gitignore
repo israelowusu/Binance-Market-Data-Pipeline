@@ -29,3 +29,5 @@ Thumbs.db
 
 # Configuration files
 client.properties
+config.ini
+kafka_2.13-3.7.0

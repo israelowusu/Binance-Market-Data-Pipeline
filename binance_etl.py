@@ -1,13 +1,12 @@
 import os
-import json
-import requests
-from datetime import datetime
-import zipfile
-import io
-from google.cloud import storage, bigquery
-import psycopg2
-import httpx   # an HTTP client library and dependency of Prefect
 from prefect import task, flow
+from data_ingestion import data_ingest
+from data_transform import data_transform
+from data_load import data_load
+import configparser
+
+# Define the cryptocurrencies to retrieve data for
+cryptocurrencies = ['BTC', 'ETH', 'SOL', 'USDT', 'ADA']
 
 # Binance API settings
 BINANCE_API_URL = 'https://api-gcp.binance.com'
@@ -22,109 +21,35 @@ KAFKA_TOPIC_BIGQUERY = 'binance_data_transform'
 # Google Cloud Storage settings
 GCS_BUCKET_NAME = 'coinbase_api_bucket'
 
+# Read database credentials from config.ini file
+config = configparser.ConfigParser()
+config.read('config.ini')
+
 # Cloud SQL PostgreSQL settings
-POSTGRES_HOST = ''
-POSTGRES_PORT = '5432'
-POSTGRES_DB = ''
-POSTGRES_USER = ''
-POSTGRES_PASSWORD = ''
+POSTGRES_HOST = config['development']['DB_HOST']
+POSTGRES_PORT = config['development']['DB_PORT']
+POSTGRES_DB = config['development']['DB_NAME']
+POSTGRES_USER = config['development']['DB_USER']
+POSTGRES_PASSWORD = config['development']['DB_PASSWORD']
 
-# Define the cryptocurrencies to retrieve data for
-cryptocurrencies = ['BTC', 'ETH', 'SOL', 'USDT', 'ADA']
-
-# Task to fetch cryptocurrency prices from Binance API
 @task
-def fetch_crypto_prices():
-    prices = {}
-    for crypto in cryptocurrencies:
-        response = requests.get(f'{BINANCE_API_URL}/api/v3/ticker/price', params={'symbol': f'{crypto}USDT'})
-        if response.status_code == 200:
-            prices[crypto] = response.json()['price']
-        else:
-            prices[crypto] = None
-    return prices
+def execute_data_ingestion():
+    data_ingest()
 
-# Task to compress data into ZIP file
 @task
-def compress_data(data):
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
-        zip_file.writestr('prices.json', json.dumps(data))
-    return zip_buffer.getvalue()
+def execute_data_transform():
+    data_transform()
 
-# Task to upload ZIP file to Google Cloud Storage
 @task
-def upload_to_gcs(zip_data):
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(GCS_BUCKET_NAME)
-    blob = bucket.blob(f'binance-data-project-{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.zip')
-    blob.upload_from_string(zip_data, content_type='application/zip')
-
-# Task to read data from Google Cloud Storage, transform it, and load it into BigQuery
-@task
-def transform_and_load_to_bigquery():
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(GCS_BUCKET_NAME)
-    blob = bucket.blob('binance-data-project.zip')
-    data = json.loads(blob.download_as_string())
-
-    transformed_data = []
-    for price in data:
-        transformed_data.append({
-            'timestamp': datetime.fromisoformat(price['timestamp']),
-            'price': price['price'],
-            'currency': price['currency']
-        })
-
-    bigquery_client = bigquery.Client()
-    dataset_id = 'coinbase_data_warehouse'
-    table_id = 'binance_prices'
-    dataset_ref = bigquery_client.dataset(dataset_id)
-    table_ref = dataset_ref.table(table_id)
-
-    rows_to_insert = []
-    for row in transformed_data:
-        rows_to_insert.append((row['timestamp'],row['price'], row['currency']))
-
-    errors = bigquery_client.insert_rows(table_ref, rows_to_insert)
-    if errors:
-        raise ValueError(f'Errors occurred while inserting rows: {errors}')
-
-# Task to load data from BigQuery into Cloud SQL PostgreSQL
-@task
-def load_to_postgresql():
-    conn = psycopg2.connect(
-        host=POSTGRES_HOST,
-        port=POSTGRES_PORT,
-        database=POSTGRES_DB,
-        user=POSTGRES_USER,
-        password=POSTGRES_PASSWORD
-    )
-    cursor = conn.cursor()
-    query = """
-        SELECT timestamp, price, currency
-        FROM coinbase_data_warehouse.binance_prices
-    """
-    cursor.execute(query)
-    rows = cursor.fetchall()
-
-    insert_query = """
-        INSERT INTO your_table_name (timestamp, price, currency)
-        VALUES (%s, %s, %s)
-    """
-    cursor.executemany(insert_query, rows)
-    conn.commit()
-    cursor.close()
-    conn.close()
+def execute_data_load():
+    data_load()
 
 # Define Prefect flow
 @flow
 def CryptoDataOrchestration():
-    crypto_prices = fetch_crypto_prices()
-    zip_data = compress_data(crypto_prices)
-    upload_to_gcs(zip_data)
-    transform_and_load_to_bigquery()
-    load_to_postgresql()
+    execute_data_ingestion()
+    execute_data_transform()
+    execute_data_load()
 
 # Run the Prefect flow
 if __name__ == '__main__':
