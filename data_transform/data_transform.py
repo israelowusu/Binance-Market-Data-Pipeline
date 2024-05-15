@@ -55,7 +55,7 @@ def load_data_to_bigquery(transformed_data):
         print(f'Errors occurred while inserting rows: {errors}')
 
 # Main function
-def main():
+def data_transform():
     # Step 1: Download the ZIP file from GCS
     zip_data = download_data_from_gcs()
 
@@ -73,4 +73,4 @@ def main():
     load_data_to_bigquery(transformed_data)
 
 if __name__ == '__main__':
-    main()
+    data_transform()
