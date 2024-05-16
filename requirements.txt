@@ -1,0 +1,13 @@
+pip install os
+pip install json
+pip install requests
+pip install google.cloud
+pip install datetime 
+pip install zipfile
+pip install io 
+pip install confluent_kafka 
+pip install threading 
+pip install time
+pip install psycopg2
+pip install configparser
+pip install prefect
