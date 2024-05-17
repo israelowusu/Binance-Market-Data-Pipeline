@@ -154,21 +154,14 @@ Ensure that your Prefect server and agent are running. Then execute the Prefect 
 1. Connect Grafana to your Cloud SQL PostgreSQL database.
 2. Create dashboards and panels to visualize the data.
 
-**Contributing**
+**Contributors**
 
-We welcome contributions!
+Israel Owusu Ansah (israel@trestleacademyghana.org)
+
+Nathaniel Yeboah Frimpong (nat@trestleacademyghana.org)
 
 
 **FAQ**
 
 **How do I monitor the Prefect tasks?**
 You can monitor the Prefect tasks on the Prefect UI. Start the Prefect server and agent, then access the UI at http://localhost:4200.
-
-
-**Contact**
-
-For any inquiries or support, please contact:
-
-Email: oaisrael633@gmail.com
-
-GitHub: israelowusu
