@@ -1,0 +1,43 @@
+###
+### A complete description of a Prefect Deployment for flow 'BinanceDataPipeline'
+###
+name: Binance Data Pipeline
+description: null
+version: b017eaea112cd80b4b14d70e5a5c03a2
+# The work queue that will handle this deployment's runs
+work_queue_name: default
+work_pool_name: null
+tags: []
+parameters: {}
+schedule: null
+schedules: []
+is_schedule_active: null
+infra_overrides: {}
+infrastructure:
+  type: process
+  env: {}
+  labels: {}
+  name: null
+  command: null
+  stream_output: true
+  working_dir: null
+  block_type_slug: process
+  _block_type_slug: process
+
+###
+### DO NOT EDIT BELOW THIS LINE
+###
+flow_name: BinanceDataPipeline
+manifest_path: null
+storage: null
+path: /home/phendy/code/data-engineer-projects/Binance-Market-Data-Pipeline
+entrypoint: binance_etl.py:BinanceDataPipeline
+parameter_openapi_schema:
+  title: Parameters
+  type: object
+  properties: {}
+  required: null
+  definitions: null
+timestamp: '2024-05-17T06:37:03.210313+00:00'
+triggers: []
+enforce_parameter_schema: null

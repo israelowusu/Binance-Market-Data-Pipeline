@@ -1,6 +1,9 @@
 import os
 import configparser
-from prefect import task, flow
+from datetime import timedelta
+from prefect import task, flow, get_run_logger
+from prefect.deployments import Deployment
+from prefect.server.schemas.schedules import IntervalSchedule
 from data_ingestion.data_ingest import data_ingest
 from data_transform.data_transform import data_transform
 from data_load.data_load import data_load
@@ -34,23 +37,42 @@ POSTGRES_PASSWORD = config['development']['DB_PASSWORD']
 
 @task
 def execute_data_ingestion():
+    logger = get_run_logger()
+    logger.info("Starting data ingestion...")
     data_ingest()
+    logger.info("Data ingestion completed.")
 
 @task
 def execute_data_transform():
+    logger = get_run_logger()
+    logger.info("Starting data transformation...")
     data_transform()
+    logger.info("Data transformation completed.")
 
 @task
 def execute_data_load():
+    logger = get_run_logger()
+    logger.info("Starting data load...")
     data_load('config.ini', '/home/phendy/Downloads/intrepid-period-422622-n5-4b46f2a8737b.json')
+    logger.info("Data load completed.")
 
 # Define Prefect flow
-@flow
+@flow(name="BinanceDataPipeline")
 def BinanceDataPipeline():
-    execute_data_ingestion()
-    execute_data_transform()
-    execute_data_load()
+    ingestion_task = execute_data_ingestion()
+    transform_task = execute_data_transform(wait_for=[ingestion_task])
+    load_task = execute_data_load(wait_for=[transform_task])
+    return load_task
 
-# Run the Prefect flow
 if __name__ == '__main__':
+    # Register the flow
+    deployment = Deployment.build_from_flow(
+        flow=BinanceDataPipeline,
+        name="BinanceDataPipelineDeployment",
+        schedule=IntervalSchedule(interval=timedelta(hours=1)),  # Adjust the schedule as needed
+        work_queue_name="default"
+    )
+    deployment.apply()
+
+    # Optionally run the flow
     BinanceDataPipeline()
